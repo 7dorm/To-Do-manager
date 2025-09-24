@@ -1,0 +1,730 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+gradle/
+  wrapper/
+    gradle-wrapper.properties
+src/
+  main/
+    java/
+      ru/
+        nsu/
+          dunaev/
+            enums/
+              Priority.java
+              Status.java
+            interfaces/
+              Analyzer.java
+              OutputHandler.java
+              ReportGenerator.java
+            realizations/
+              ConsoleOutput.java
+              StatusAnalyzer.java
+              TaskReportGenerator.java
+            Main.java
+            Task.java
+            TaskManager.java
+            TaskUpdater.java
+.gitignore
+build.gradle
+gradlew
+gradlew.bat
+settings.gradle
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="gradle/wrapper/gradle-wrapper.properties">
+#Tue Sep 16 20:09:34 NOVT 2025
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.10-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/enums/Priority.java">
+package ru.nsu.dunaev.enums;
+
+public enum Priority {
+    LOW,
+    MEDIUM,
+    HIGH
+}
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/enums/Status.java">
+package ru.nsu.dunaev.enums;
+
+public enum Status {
+    NEW,
+    IN_PROGRESS,
+    DONE
+}
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/interfaces/Analyzer.java">
+package ru.nsu.dunaev.interfaces;
+
+import ru.nsu.dunaev.Task;
+
+import java.util.List;
+
+public interface Analyzer<T, ID> {
+    T analyze(List<Task<ID>> tasks);
+}
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/interfaces/OutputHandler.java">
+package ru.nsu.dunaev.interfaces;
+
+public interface OutputHandler {
+    void print(String message);
+}
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/interfaces/ReportGenerator.java">
+package ru.nsu.dunaev.interfaces;
+
+public interface ReportGenerator<T> {
+    void generateReport(T analysisResult);
+}
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/realizations/ConsoleOutput.java">
+package ru.nsu.dunaev.realizations;
+
+import ru.nsu.dunaev.interfaces.OutputHandler;
+
+public class ConsoleOutput implements OutputHandler {
+    @Override
+    public void print(String message) {
+        System.out.println(message);
+    }
+}
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/realizations/StatusAnalyzer.java">
+package ru.nsu.dunaev.realizations;
+
+import ru.nsu.dunaev.Task;
+import ru.nsu.dunaev.enums.Status;
+import ru.nsu.dunaev.interfaces.Analyzer;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class StatusAnalyzer<ID> implements Analyzer<Map<Status, Long>, ID> {
+    @Override
+    public Map<Status, Long> analyze(List<Task<ID>> tasks) {
+        return tasks.stream()
+                .collect(Collectors.groupingBy(Task::getStatus, Collectors.counting()));
+    }
+}
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/realizations/TaskReportGenerator.java">
+package ru.nsu.dunaev.realizations;
+
+import ru.nsu.dunaev.enums.Status;
+import ru.nsu.dunaev.interfaces.OutputHandler;
+import ru.nsu.dunaev.interfaces.ReportGenerator;
+
+import java.util.Map;
+
+public class TaskReportGenerator<ID> implements ReportGenerator<Map<Status, Long>> {
+    private final OutputHandler output;
+
+    public TaskReportGenerator(OutputHandler output) {
+        this.output = output;
+    }
+
+    @Override
+    public void generateReport(Map<Status, Long> analysisResult) {
+        analysisResult.forEach((status, count) ->
+                output.print(status + ": " + count));
+    }
+}
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/Main.java">
+package ru.nsu.dunaev;
+
+
+import ru.nsu.dunaev.enums.Priority;
+import ru.nsu.dunaev.enums.Status;
+import ru.nsu.dunaev.interfaces.Analyzer;
+import ru.nsu.dunaev.interfaces.OutputHandler;
+import ru.nsu.dunaev.interfaces.ReportGenerator;
+import ru.nsu.dunaev.realizations.ConsoleOutput;
+import ru.nsu.dunaev.realizations.StatusAnalyzer;
+import ru.nsu.dunaev.realizations.TaskReportGenerator;
+
+import java.util.Map;
+import java.util.UUID;
+
+public class Main {
+    public static void main(String[] args) {
+        TaskManager<UUID> manager = new TaskManager<>();
+        OutputHandler output = new ConsoleOutput();
+
+        manager.addTask(new Task<>(UUID.randomUUID(), "Buy groceries", "Milk and Eggs", Priority.HIGH, Status.NEW));
+        manager.addTask(new Task<>(UUID.randomUUID(), "Write report", "Prepare sales report", Priority.MEDIUM, Status.NEW));
+
+        TaskUpdater<UUID> updater = new TaskUpdater<>();
+        updater.parallelUpdateStatus(manager.getAllTasks(), Status.NEW, Status.IN_PROGRESS);
+
+        Analyzer<Map<Status, Long>, UUID> analyzer = new StatusAnalyzer<>();
+        Map<Status, Long> result = analyzer.analyze(manager.getAllTasks());
+
+        ReportGenerator<Map<Status, Long>> report = new TaskReportGenerator<>(output);
+        report.generateReport(result);
+
+        updater.shutdown();
+    }
+}
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/Task.java">
+package ru.nsu.dunaev;
+
+
+import ru.nsu.dunaev.enums.Priority;
+import ru.nsu.dunaev.enums.Status;
+
+public class Task<ID> {
+    private final ID id;
+    private String title;
+    private String description;
+    private Priority priority;
+    private Status status;
+
+    public Task(ID id, String title, String description, Priority priority, Status status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.priority = priority;
+        this.status = status;
+    }
+
+    public ID getId() { return id; }
+    public String getTitle() { return title; }
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
+    public Priority getPriority() { return priority; }
+
+    public void markDone() { this.status = Status.DONE; }
+    public void markInProgress() { this.status = Status.IN_PROGRESS; }
+}
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/TaskManager.java">
+package ru.nsu.dunaev;
+
+import ru.nsu.dunaev.enums.Status;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class TaskManager<ID> {
+    private final List<Task<ID>> tasks = new ArrayList<>();
+
+    public void addTask(Task<ID> task) {
+        tasks.add(task);
+    }
+
+    public void removeTask(ID id) {
+        tasks.removeIf(task -> task.getId().equals(id));
+    }
+
+    public List<Task<ID>> getAllTasks() {
+        return Collections.unmodifiableList(tasks);
+    }
+
+    public List<Task<ID>> getTasksByStatus(Status status) {
+        return tasks.stream()
+                .filter(task -> task.getStatus() == status)
+                .collect(Collectors.toList());
+    }
+}
+</file>
+
+<file path="src/main/java/ru/nsu/dunaev/TaskUpdater.java">
+package ru.nsu.dunaev;
+
+import ru.nsu.dunaev.enums.Status;
+
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class TaskUpdater<ID> {
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
+
+    public void parallelUpdateStatus(List<Task<ID>> tasks, Status oldStatus, Status newStatus) {
+        List<Callable<Void>> callables = tasks.stream()
+                .filter(task -> task.getStatus() == oldStatus)
+                .map(task -> (Callable<Void>) () -> {
+                    System.out.println(Thread.currentThread().getName() + " updating task: " + task.getTitle());
+                    task.setStatus(newStatus);
+                    return null;
+                }).toList();
+
+        try {
+            executor.invokeAll(callables);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public void shutdown() {
+        executor.shutdown();
+    }
+}
+</file>
+
+<file path=".gitignore">
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### IntelliJ IDEA ###
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+</file>
+
+<file path="build.gradle">
+plugins {
+    id 'java'
+}
+
+group = 'ru.nsu.dunaev'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+</file>
+
+<file path="gradlew">
+#!/bin/sh
+
+#
+# Copyright © 2015-2021 the original authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+##############################################################################
+#
+#   Gradle start up script for POSIX generated by Gradle.
+#
+#   Important for running:
+#
+#   (1) You need a POSIX-compliant shell to run this script. If your /bin/sh is
+#       noncompliant, but you have some other compliant shell such as ksh or
+#       bash, then to run this script, type that shell name before the whole
+#       command line, like:
+#
+#           ksh Gradle
+#
+#       Busybox and similar reduced shells will NOT work, because this script
+#       requires all of these POSIX shell features:
+#         * functions;
+#         * expansions «$var», «${var}», «${var:-default}», «${var+SET}»,
+#           «${var#prefix}», «${var%suffix}», and «$( cmd )»;
+#         * compound commands having a testable exit status, especially «case»;
+#         * various built-in commands including «command», «set», and «ulimit».
+#
+#   Important for patching:
+#
+#   (2) This script targets any POSIX shell, so it avoids extensions provided
+#       by Bash, Ksh, etc; in particular arrays are avoided.
+#
+#       The "traditional" practice of packing multiple parameters into a
+#       space-separated string is a well documented source of bugs and security
+#       problems, so this is (mostly) avoided, by progressively accumulating
+#       options in "$@", and eventually passing that to Java.
+#
+#       Where the inherited environment variables (DEFAULT_JVM_OPTS, JAVA_OPTS,
+#       and GRADLE_OPTS) rely on word-splitting, this is performed explicitly;
+#       see the in-line comments for details.
+#
+#       There are tweaks for specific operating systems such as AIX, CygWin,
+#       Darwin, MinGW, and NonStop.
+#
+#   (3) This script is generated from the Groovy template
+#       https://github.com/gradle/gradle/blob/master/subprojects/plugins/src/main/resources/org/gradle/api/internal/plugins/unixStartScript.txt
+#       within the Gradle project.
+#
+#       You can find Gradle at https://github.com/gradle/gradle/.
+#
+##############################################################################
+
+# Attempt to set APP_HOME
+
+# Resolve links: $0 may be a link
+app_path=$0
+
+# Need this for daisy-chained symlinks.
+while
+    APP_HOME=${app_path%"${app_path##*/}"}  # leaves a trailing /; empty if no leading path
+    [ -h "$app_path" ]
+do
+    ls=$( ls -ld "$app_path" )
+    link=${ls#*' -> '}
+    case $link in             #(
+      /*)   app_path=$link ;; #(
+      *)    app_path=$APP_HOME$link ;;
+    esac
+done
+
+APP_HOME=$( cd "${APP_HOME:-./}" && pwd -P ) || exit
+
+APP_NAME="Gradle"
+APP_BASE_NAME=${0##*/}
+
+# Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+
+# Use the maximum available, or set MAX_FD != -1 to use that value.
+MAX_FD=maximum
+
+warn () {
+    echo "$*"
+} >&2
+
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+} >&2
+
+# OS specific support (must be 'true' or 'false').
+cygwin=false
+msys=false
+darwin=false
+nonstop=false
+case "$( uname )" in                #(
+  CYGWIN* )         cygwin=true  ;; #(
+  Darwin* )         darwin=true  ;; #(
+  MSYS* | MINGW* )  msys=true    ;; #(
+  NONSTOP* )        nonstop=true ;;
+esac
+
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+
+
+# Determine the Java command to use to start the JVM.
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
+        # IBM's JDK on AIX uses strange locations for the executables
+        JAVACMD=$JAVA_HOME/jre/sh/java
+    else
+        JAVACMD=$JAVA_HOME/bin/java
+    fi
+    if [ ! -x "$JAVACMD" ] ; then
+        die "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+    fi
+else
+    JAVACMD=java
+    which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+
+Please set the JAVA_HOME variable in your environment to match the
+location of your Java installation."
+fi
+
+# Increase the maximum file descriptors if we can.
+if ! "$cygwin" && ! "$darwin" && ! "$nonstop" ; then
+    case $MAX_FD in #(
+      max*)
+        MAX_FD=$( ulimit -H -n ) ||
+            warn "Could not query maximum file descriptor limit"
+    esac
+    case $MAX_FD in  #(
+      '' | soft) :;; #(
+      *)
+        ulimit -n "$MAX_FD" ||
+            warn "Could not set maximum file descriptor limit to $MAX_FD"
+    esac
+fi
+
+# Collect all arguments for the java command, stacking in reverse order:
+#   * args from the command line
+#   * the main class name
+#   * -classpath
+#   * -D...appname settings
+#   * --module-path (only if needed)
+#   * DEFAULT_JVM_OPTS, JAVA_OPTS, and GRADLE_OPTS environment variables.
+
+# For Cygwin or MSYS, switch paths to Windows format before running java
+if "$cygwin" || "$msys" ; then
+    APP_HOME=$( cygpath --path --mixed "$APP_HOME" )
+    CLASSPATH=$( cygpath --path --mixed "$CLASSPATH" )
+
+    JAVACMD=$( cygpath --unix "$JAVACMD" )
+
+    # Now convert the arguments - kludge to limit ourselves to /bin/sh
+    for arg do
+        if
+            case $arg in                                #(
+              -*)   false ;;                            # don't mess with options #(
+              /?*)  t=${arg#/} t=/${t%%/*}              # looks like a POSIX filepath
+                    [ -e "$t" ] ;;                      #(
+              *)    false ;;
+            esac
+        then
+            arg=$( cygpath --path --ignore --mixed "$arg" )
+        fi
+        # Roll the args list around exactly as many times as the number of
+        # args, so each arg winds up back in the position where it started, but
+        # possibly modified.
+        #
+        # NB: a `for` loop captures its iteration list before it begins, so
+        # changing the positional parameters here affects neither the number of
+        # iterations, nor the values presented in `arg`.
+        shift                   # remove old arg
+        set -- "$@" "$arg"      # push replacement arg
+    done
+fi
+
+# Collect all arguments for the java command;
+#   * $DEFAULT_JVM_OPTS, $JAVA_OPTS, and $GRADLE_OPTS can contain fragments of
+#     shell script including quotes and variable substitutions, so put them in
+#     double quotes to make sure that they get re-expanded; and
+#   * put everything else in single quotes, so that it's not re-expanded.
+
+set -- \
+        "-Dorg.gradle.appname=$APP_BASE_NAME" \
+        -classpath "$CLASSPATH" \
+        org.gradle.wrapper.GradleWrapperMain \
+        "$@"
+
+# Use "xargs" to parse quoted args.
+#
+# With -n1 it outputs one arg per line, with the quotes and backslashes removed.
+#
+# In Bash we could simply go:
+#
+#   readarray ARGS < <( xargs -n1 <<<"$var" ) &&
+#   set -- "${ARGS[@]}" "$@"
+#
+# but POSIX shell has neither arrays nor command substitution, so instead we
+# post-process each arg (as a line of input to sed) to backslash-escape any
+# character that might be a shell metacharacter, then use eval to reverse
+# that process (while maintaining the separation between arguments), and wrap
+# the whole thing up as a single "set" statement.
+#
+# This will of course break if any of these variables contains a newline or
+# an unmatched quote.
+#
+
+eval "set -- $(
+        printf '%s\n' "$DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS" |
+        xargs -n1 |
+        sed ' s~[^-[:alnum:]+,./:=@_]~\\&~g; ' |
+        tr '\n' ' '
+    )" '"$@"'
+
+exec "$JAVACMD" "$@"
+</file>
+
+<file path="gradlew.bat">
+@rem
+@rem Copyright 2015 the original author or authors.
+@rem
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem      https://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
+@rem
+
+@if "%DEBUG%" == "" @echo off
+@rem ##########################################################################
+@rem
+@rem  Gradle startup script for Windows
+@rem
+@rem ##########################################################################
+
+@rem Set local scope for the variables with windows NT shell
+if "%OS%"=="Windows_NT" setlocal
+
+set DIRNAME=%~dp0
+if "%DIRNAME%" == "" set DIRNAME=.
+set APP_BASE_NAME=%~n0
+set APP_HOME=%DIRNAME%
+
+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
+
+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
+
+@rem Find java.exe
+if defined JAVA_HOME goto findJavaFromJavaHome
+
+set JAVA_EXE=java.exe
+%JAVA_EXE% -version >NUL 2>&1
+if "%ERRORLEVEL%" == "0" goto execute
+
+echo.
+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+echo.
+echo Please set the JAVA_HOME variable in your environment to match the
+echo location of your Java installation.
+
+goto fail
+
+:findJavaFromJavaHome
+set JAVA_HOME=%JAVA_HOME:"=%
+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
+
+if exist "%JAVA_EXE%" goto execute
+
+echo.
+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
+echo.
+echo Please set the JAVA_HOME variable in your environment to match the
+echo location of your Java installation.
+
+goto fail
+
+:execute
+@rem Setup the command line
+
+set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
+
+
+@rem Execute Gradle
+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
+
+:end
+@rem End local scope for the variables with windows NT shell
+if "%ERRORLEVEL%"=="0" goto mainEnd
+
+:fail
+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+rem the _cmd.exe /c_ return code!
+if  not "" == "%GRADLE_EXIT_CONSOLE%" exit 1
+exit /b 1
+
+:mainEnd
+if "%OS%"=="Windows_NT" endlocal
+
+:omega
+</file>
+
+<file path="settings.gradle">
+rootProject.name = 'OOPrep'
+</file>
+
+</files>
