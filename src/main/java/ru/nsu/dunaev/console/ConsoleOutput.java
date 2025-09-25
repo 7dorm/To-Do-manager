@@ -1,4 +1,4 @@
-package ru.nsu.dunaev.realizations;
+package ru.nsu.dunaev.console;
 
 import ru.nsu.dunaev.interfaces.OutputHandler;
 

@@ -1,6 +1,6 @@
 package ru.nsu.dunaev.interfaces;
 
-import ru.nsu.dunaev.Task;
+import ru.nsu.dunaev.taskManagment.Task;
 
 import java.util.List;
 

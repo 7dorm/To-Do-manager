@@ -1,4 +1,4 @@
-package ru.nsu.dunaev;
+package ru.nsu.dunaev.taskManagment;
 
 import ru.nsu.dunaev.enums.Status;
 

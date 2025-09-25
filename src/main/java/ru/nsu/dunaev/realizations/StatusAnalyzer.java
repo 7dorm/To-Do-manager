@@ -1,6 +1,6 @@
 package ru.nsu.dunaev.realizations;
 
-import ru.nsu.dunaev.Task;
+import ru.nsu.dunaev.taskManagment.Task;
 import ru.nsu.dunaev.enums.Status;
 import ru.nsu.dunaev.interfaces.Analyzer;
 
